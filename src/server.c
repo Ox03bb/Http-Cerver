@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "http/parser.h"
+
 #define PORT 4500
 #define BUFSIZE 4096
 
@@ -53,7 +55,13 @@ int main(int argc, char const *argv[]){
 		}
 
 		read(new_socket, buffer, BUFSIZE);
-		printf("Client: %s\n", buffer);
+		// printf("Client: %s\n", buffer);
+		HttpRequest* req = parse_http_request(buffer);
+		if (req) {
+			printf("Method: %s\n", req->method);
+			printf("Path: %s\n", req->path);
+			printf("Version: %s\n", req->version);
+		}
 
 		send(new_socket, server_msg, strlen(server_msg), 0);
 		printf("Server message sent\n");

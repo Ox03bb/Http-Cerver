@@ -55,3 +55,7 @@ dkms.conf
 *.dwo
 
 .vscode/
+
+# CMake files
+build/*
+bin/*
