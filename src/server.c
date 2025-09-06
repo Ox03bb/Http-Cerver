@@ -4,16 +4,18 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <unistd.h>
+
 #define PORT 4500
+#define BUFSIZE 4096
 
 int main(int argc, char const *argv[]){
 	struct sockaddr_in addr;
 	socklen_t addr_len = sizeof(addr);
 
 	int opt = 1;
-	
-	char buffer[1024] = { 0 };
-	memsret(buffer, 0, sizeof(buffer)); // clear buffer
+
+	char* buffer = (char*)malloc(BUFSIZE * sizeof(char));
+	memset(buffer, 0, BUFSIZE); // clear buffer
 
 	char* server_msg = "server is running";
 
@@ -41,6 +43,7 @@ int main(int argc, char const *argv[]){
         perror("listen");
         exit(EXIT_FAILURE);
     }
+	printf("Server listening on address %s:%d\n", addr.sin_addr, addr.sin_port);
 
 	while (1) {
 		int new_socket = accept(server_fd, (struct sockaddr*)&addr, &addr_len);
@@ -49,7 +52,7 @@ int main(int argc, char const *argv[]){
 			exit(EXIT_FAILURE);
 		}
 
-		read(new_socket, buffer, sizeof(buffer));
+		read(new_socket, buffer, BUFSIZE);
 		printf("Client: %s\n", buffer);
 
 		send(new_socket, server_msg, strlen(server_msg), 0);
@@ -57,6 +60,6 @@ int main(int argc, char const *argv[]){
 
 		close(new_socket);
 		
-		memsret(buffer, 0, sizeof(buffer)); // clear buffer
+		memset(buffer, 0, BUFSIZE); // clear buffer
 	}
 }
