@@ -5,15 +5,32 @@
 #include <regex.h>
 
 #define URL_PATH_PATTERN "^(/|/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)*/?)$"
+#define QUERY_PARAM_PATTERN "^[a-zA-Z0-9_]+=[a-zA-Z0-9_]+(&[a-zA-Z0-9_]+=[a-zA-Z0-9_]+)*$"
 
 char* methods[9] = {"GET","POST","PUT","DELETE","HEAD","OPTIONS","PATCH","TRACE","CONNECT"};
 char* versions[3] = {"HTTP/1.0","HTTP/1.1","HTTP/2.0"};
 
+typedef struct Header{
+	char* key;
+	char* value;
+} Header;
+
+typedef struct Headers {
+	Header* headers;
+	char* host;
+	int content_length;
+	char* content_type;
+	char* user_agent;
+	char* accept;
+	char* connection;
+} Headers;
+
 typedef struct HttpRequest {
 	char* method;
 	char* path;
+	char* query_params;
 	char* version;
-	char* headers;
+	Headers* headers;
 	char* body;
 } HttpRequest;
 
@@ -28,7 +45,8 @@ HttpRequest* parse_http_request(const char* request) {
 	regex_t regex;
 
 	char method[8];
-	char path[256];
+	char path[1024];
+	char query_params[1024];
 	char version[16];
 	char headers[2048];
 	char body[4096];
@@ -37,7 +55,7 @@ HttpRequest* parse_http_request(const char* request) {
 	int8_t cur = 0; 
 
 	// Parse the HTTP method
-	while (*ptr != ' ') {
+	while (*ptr != ' ' && cur < 7) {
 		method[cur++] = *ptr++;
 	}
 	method[cur] = '\0';
@@ -55,12 +73,20 @@ HttpRequest* parse_http_request(const char* request) {
 	// Parse the URL path
 	cur = 0;
 	ptr++; 
-	while (*ptr != ' ') {
+	while (*ptr != ' ' || *ptr != '\r' || *ptr != '\0') {
 		path[cur++] = *ptr++;
-	}
-	req->path = path;
-	path[cur] = '\0';
+		if (*ptr == '\?') {
+			cur = 0;
+			ptr++;
+			while (*ptr != ' ' || *ptr != '\r' || *ptr != '\0') {
+				query_params[cur++] = *ptr++;
+			}
 
+		}
+	}
+	path[cur] = '\0';
+	req->path = path;
+	
 	if (regcomp(&regex, URL_PATH_PATTERN, REG_EXTENDED) != 0) {
 		printf("Could not compile regex\n");
 		return NULL;
@@ -75,7 +101,7 @@ HttpRequest* parse_http_request(const char* request) {
 	// Parse the HTTP version
 	cur = 0;
 	ptr++;
-	while (*ptr != '\r') {
+	while (*ptr != '\r' && cur < 9) {
 		version[cur++] = *ptr++;
 	}
 	version[cur] = '\0';
