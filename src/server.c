@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h> 
 
 #include "http/parser.h"
 
@@ -45,7 +46,7 @@ int main(int argc, char const *argv[]){
         perror("listen");
         exit(EXIT_FAILURE);
     }
-	printf("Server listening on address %s:%d\n", addr.sin_addr, addr.sin_port);
+	printf("Server listening on address %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
 	while (1) {
 		int new_socket = accept(server_fd, (struct sockaddr*)&addr, &addr_len);
@@ -70,4 +71,6 @@ int main(int argc, char const *argv[]){
 		
 		memset(buffer, 0, BUFSIZE); // clear buffer
 	}
+	free(buffer);
+	return 0;
 }
