@@ -15,15 +15,15 @@ typedef struct Header{
 	char* value;
 } Header;
 
-typedef struct Headers {
-	Header* headers;
-	char* host;
-	int content_length;
-	char* content_type;
-	char* user_agent;
-	char* accept;
-	char* connection;
-} Headers;
+// typedef struct Headers {
+// 	Header* headers;
+// 	char* host;
+// 	int content_length;
+// 	char* content_type;
+// 	char* user_agent;
+// 	char* accept;
+// 	char* connection;
+// } Headers;
 
 //! in the next version support multiple query parameters
 typedef struct QueryParam {
@@ -41,16 +41,12 @@ typedef struct HttpRequest {
 	char* path;
 	char* query_params;
 	char* version;
-	Headers* headers;
+	Header* headers;
 	char* body;
 } HttpRequest;
 
-int8_t parse_http_method(char* request, char* ptr, HttpRequest* req) {
-	char* method[8];
-	if (!method) {
-		perror("malloc failed");
-		return -1;
-	}
+int8_t parse_http_method(char* ptr, HttpRequest* req) {
+	char method[8];
 
 	int8_t cur = 0;
 
@@ -58,19 +54,18 @@ int8_t parse_http_method(char* request, char* ptr, HttpRequest* req) {
 		method[cur++] = *ptr++;
 	}
 	method[cur] = '\0';
-	ptr++;
 
 	for (int8_t j = 0; j < 9; j++) {
 		if (strcmp(method, methods[j]) == 0) {
-			req->method = method;
+			req->method = strdup(method);
 			return 0;
 		}
 	}
 	return -1;
 }
-int8_t parse_http_path(char* request, char* ptr , HttpRequest* req) {
-	char* path[2048];
-	char* query_params[1024];
+int8_t parse_http_path(char* ptr , HttpRequest* req) {
+	char path[2048];
+	char query_params[1024];
 	
 	memset(path, 0, sizeof(path));
 	memset(query_params, 0, sizeof(query_params));
@@ -86,37 +81,29 @@ int8_t parse_http_path(char* request, char* ptr , HttpRequest* req) {
 				query_params[cur2++] = *ptr++;
 			}
 			query_params[cur2] = '\0';
-			req->query_params = query_params;
-			
+			req->query_params = strdup(query_params);
 			break;
 		}
 	}
 	path[cur++] = '\0';
 	
-
 	regex_t regex;
 	if (regcomp(&regex, URL_PATH_PATTERN, REG_EXTENDED) != 0) {
 		printf("Could not compile regex\n");
-		free(path);
 		return -1;
 	}
 
 	if (regexec(&regex, path, 0, NULL, 0) != 0) {
 		printf("Invalid URL path\n");
-		free(path);
 		return -1;
 	}
 	regfree(&regex);
 
-	req->path = path;
+	req->path = strdup(path);
 	return 0;
 }
-char* parse_http_version(char* request, char* ptr) {
-	char* version = malloc(16);
-	if (!version) {
-		perror("malloc failed");
-		return NULL;
-	}
+int8_t parse_http_version(char* ptr, HttpRequest* req) {
+	char version[16];
 	memset(version, 0, 16);
 
 	int8_t cur = 0;
@@ -126,12 +113,58 @@ char* parse_http_version(char* request, char* ptr) {
 	version[cur] = '\0';
 	for (int8_t j = 0; j < 3; j++) {
 		if (strcmp(version, versions[j]) == 0) {
-			return version;
+			req->version = strdup(version);
+			return 0;
 		}
 	}
-	free(version);
-	return NULL;
+	return -1;
 }
+
+int8_t parse_http_headers(char* ptr, HttpRequest* req) {
+	Header* headers = malloc(sizeof(Header) * 100);
+	int header_num = 0;
+
+	if (!headers) {
+		perror("malloc failed");
+		return -1;
+	}
+	memset(headers, 0, sizeof(Header) * 100);
+	
+	while (ptr[0] == '\r' && ptr[2] == '\r'){
+
+        char key[256] = {0};
+        char value[1024] = {0};
+        int k = 0, v = 0;
+
+		int cur = 0;
+		
+		while (*ptr && *ptr != ':' && k < 255){
+			key[cur++] = *ptr++;
+		}
+		key[cur] = '\0';
+		ptr++;
+
+		cur = 0;
+
+		while (*ptr && !(ptr[0] == '\r' && ptr[1] == '\n') && v < 1023){
+			value[cur++] = *ptr++;
+
+		}
+		value[cur] = '\0';
+
+		headers[header_num].key = strdup(key);
+		headers[header_num].value = strdup(value);
+		header_num ++;
+
+		if (ptr[0] == '\r' && ptr[1] == '\n') ptr += 2;
+
+	}
+	headers[header_num].key = NULL;
+	headers[header_num].value = NULL;
+	req->headers = headers;
+	return 0;
+}
+
 
 HttpRequest* parse_http_request(char* request) {
 	HttpRequest* req = malloc(sizeof(HttpRequest));
@@ -143,33 +176,25 @@ HttpRequest* parse_http_request(char* request) {
 
 	regex_t regex;
 
-	char method[8];
-	char path[1024];
-	char query_params[1024];
-	char version[16];
-	char headers[2048];
-	char body[4096];
-
 	char* ptr = (char*)request;
 	int8_t cur = 0; 
 
-	req->method = parse_http_method(request, ptr);
-	if (req->method == NULL) {
+	if (parse_http_method(ptr, req) == -1) {
 		printf("Invalid HTTP method\n");
 		free(req);
 		return NULL;
 	}
-	ptr += strlen(req->method) + 1;
-	req->path = parse_http_path(request, ptr);
-	if (req->path == NULL) {
+	ptr += strlen(req->method) + 1; 
+	if (parse_http_path(ptr, req) == -1) {
 		printf("Invalid URL path\n");
 		free(req->method);
 		free(req);
 		return NULL;
 	}
-	ptr += strlen(req->path) + 1;
-	req->version = parse_http_version(request, ptr);
-	if (req->version == NULL) {
+
+	ptr += strlen(req->path);
+	while (*ptr == ' ') ptr++;
+	if (parse_http_version(ptr, req) == -1) {
 		printf("Invalid HTTP version \n");
 		free(req->method);
 		free(req->path);
@@ -177,14 +202,14 @@ HttpRequest* parse_http_request(char* request) {
 		return NULL;
 	}
 
-	
-// ========================================
-	// // Parse headers
-	// cur = 0;
-	// ptr += 2;
-	// while (!(ptr[0] == '\r' && ptr[1] == '\n')) {
-	// 	headers[cur++] = *ptr++;
-	// }
-	// req->headers = headers;
+	ptr += strlen(req->version);
+	if (parse_http_headers(ptr, req) == -1) {
+		printf("Invalid HTTP headers \n");
+		free(req->method);
+		free(req->path);
+		free(req->headers);
+		free(req);
+		return NULL;
+	}
 	return req;
 }
