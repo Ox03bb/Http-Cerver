@@ -205,10 +205,12 @@ int8_t parse_http_body(char* ptr, HttpRequest* req) {
 		req->body = NULL;
 		return 0;
 	}
-	for (int i = 0; i < atoi(req->content_length->value); i++) {
+	int content_length = atoi(req->content_length->value);
+
+	for (int i = 0; i < content_length; i++) {
 		body[i] = *ptr++;
 	}
-	body[atoi(req->content_length->value)] = '\0';
+	body[content_length] = '\0';
 
 	req->body = strdup(body);
 	return 0;
