@@ -130,28 +130,28 @@ int8_t parse_http_headers(char* ptr, HttpRequest* req) {
 	}
 	memset(headers, 0, sizeof(Header) * 100);
 	
-	while (ptr[0] == '\r' && ptr[2] == '\r'){
+	while (*ptr == '\r' || *ptr == '\n' || *ptr == ' '){ptr++;}
+
+	while (ptr[0] != '\r' && ptr[1] != '\n'){
 
         char key[256] = {0};
         char value[1024] = {0};
-        int k = 0, v = 0;
 
 		int cur = 0;
 		
-		while (*ptr && *ptr != ':' && k < 255){
+		while (*ptr && *ptr != ':' && cur < 255){
 			key[cur++] = *ptr++;
 		}
 		key[cur] = '\0';
-		ptr++;
+		ptr += 2;
 
 		cur = 0;
 
-		while (*ptr && !(ptr[0] == '\r' && ptr[1] == '\n') && v < 1023){
+		while (*ptr && !(ptr[0] == '\r' && ptr[1] == '\n') && cur < 1023){
 			value[cur++] = *ptr++;
 
 		}
 		value[cur] = '\0';
-
 		headers[header_num].key = strdup(key);
 		headers[header_num].value = strdup(value);
 		header_num ++;
@@ -184,6 +184,7 @@ HttpRequest* parse_http_request(char* request) {
 		free(req);
 		return NULL;
 	}
+
 	ptr += strlen(req->method) + 1; 
 	if (parse_http_path(ptr, req) == -1) {
 		printf("Invalid URL path\n");
@@ -203,6 +204,7 @@ HttpRequest* parse_http_request(char* request) {
 	}
 
 	ptr += strlen(req->version);
+	while (*ptr == ' ' |*ptr == '\n'|| *ptr == '\r') ptr++;
 	if (parse_http_headers(ptr, req) == -1) {
 		printf("Invalid HTTP headers \n");
 		free(req->method);
