@@ -64,12 +64,14 @@ int main(int argc, char const *argv[]){
 			printf("Method: %s\n", req->method);
 			printf("Path: %s\n", req->path);
 			printf("Version: %s\n", req->version);
-			printf("header: \n");
+			printf("header(%d): \n", req->header_count);
 			int cnt = 0;
-			while (req->headers[cnt].key != NULL){
-				printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);			
-				cnt++;
+			while (req->headers[cnt].key) {
+			    printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);
+			    cnt++;
 			}
+
+			// printf("Body: %s\n", req->body);
 		}
 
 		send(new_socket, server_msg, strlen(server_msg), 0);
@@ -77,7 +79,7 @@ int main(int argc, char const *argv[]){
 
 		close(new_socket);
 		
-		memset(buffer, 0, BUFSIZE); // clear buffer
+		memset(buffer, 0, BUFSIZE);
 	}
 	free(buffer);
 	return 0;

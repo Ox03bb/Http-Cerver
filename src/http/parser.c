@@ -41,7 +41,11 @@ typedef struct HttpRequest {
 	char* path;
 	char* query_params;
 	char* version;
+	Header* host;
+	Header* user_agent;
+	Header* content_length;
 	Header* headers;
+    int header_count;
 	char* body;
 } HttpRequest;
 
@@ -130,8 +134,6 @@ int8_t parse_http_headers(char* ptr, HttpRequest* req) {
 	}
 	memset(headers, 0, sizeof(Header) * 100);
 	
-	while (*ptr == '\r' || *ptr == '\n' || *ptr == ' '){ptr++;}
-
 	while (ptr[0] != '\r' && ptr[1] != '\n'){
 
         char key[256] = {0};
@@ -152,9 +154,29 @@ int8_t parse_http_headers(char* ptr, HttpRequest* req) {
 
 		}
 		value[cur] = '\0';
-		headers[header_num].key = strdup(key);
-		headers[header_num].value = strdup(value);
-		header_num ++;
+
+		if (strcmp(key, "Host") == 0) {
+			req->host = malloc(sizeof(Header));
+			req->host->key = strdup(key);
+			req->host->value = strdup(value);
+		}
+		else if (strcmp(key, "User-Agent") == 0) {
+			req->user_agent = malloc(sizeof(Header));
+			req->user_agent->key = strdup(key);
+			req->user_agent->value = strdup(value);
+		}
+		else if (strcmp(key, "Content-Length") == 0) {
+			req->content_length = malloc(sizeof(Header));
+			req->content_length->key = strdup(key);
+			req->content_length->value = strdup(value);
+		}
+		else {
+			headers[header_num].key = strdup(key);
+			headers[header_num].value = strdup(value);
+			header_num ++;
+
+		}
+		
 
 		if (ptr[0] == '\r' && ptr[1] == '\n') ptr += 2;
 
@@ -162,9 +184,28 @@ int8_t parse_http_headers(char* ptr, HttpRequest* req) {
 	headers[header_num].key = NULL;
 	headers[header_num].value = NULL;
 	req->headers = headers;
+	req->header_count = header_num;
 	return 0;
 }
 
+int8_t parse_http_body(char* ptr, HttpRequest* req) {
+	char body[8192];
+	memset(body, 0, sizeof(body));
+
+	while (*ptr == ' ' |*ptr == '\n'|| *ptr == '\r') ptr++;
+
+	if (req->content_length == NULL) {
+		req->body = NULL;
+		return 0;
+	}
+	for (int i = 0; i < atoi(req->content_length->value); i++) {
+		body[i] = *ptr++;
+	}
+	body[atoi(req->content_length->value)] = '\0';
+
+	req->body = strdup(body);
+	return 0;
+}
 
 HttpRequest* parse_http_request(char* request) {
 	HttpRequest* req = malloc(sizeof(HttpRequest));
@@ -204,7 +245,7 @@ HttpRequest* parse_http_request(char* request) {
 	}
 
 	ptr += strlen(req->version);
-	while (*ptr == ' ' |*ptr == '\n'|| *ptr == '\r') ptr++;
+	while (*ptr == ' ' ||*ptr == '\n'|| *ptr == '\r') ptr++;
 	if (parse_http_headers(ptr, req) == -1) {
 		printf("Invalid HTTP headers \n");
 		free(req->method);
