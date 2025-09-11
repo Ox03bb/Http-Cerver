@@ -7,12 +7,16 @@ typedef struct Header {
 } Header;
 
 typedef struct HttpRequest {
-    char* method;
-    char* path;
-    char* query_params;
-    char* version;
-    Header* headers;
-    char* body;
+	char* method;
+	char* path;
+	char* query_params;
+	char* version;
+	Header* host;
+	Header* user_agent;
+	Header* content_length;
+	Header* headers;
+    int header_count;
+	char* body;
 } HttpRequest;
 
 HttpRequest* parse_http_request(char* request);
