@@ -62,6 +62,10 @@ int main(int argc, char const *argv[]){
 
 		if (req) {
 			printf("Method: %s\n", req->method);
+			if (req->content_length)
+			    printf("Content-Length: %s\n", req->content_length->value);
+			else
+			    printf("Content-Length: NULL\n");
 			printf("Path: %s\n", req->path);
 			printf("Version: %s\n", req->version);
 			printf("header(%d): \n", req->header_count);
@@ -70,8 +74,8 @@ int main(int argc, char const *argv[]){
 			    printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);
 			    cnt++;
 			}
-
-			// printf("Body: %s\n", req->body);
+			if (req->body) printf("Body: %s\n", req->body);
+			else printf("Body: NULL\n");
 		}
 
 		send(new_socket, server_msg, strlen(server_msg), 0);
