@@ -7,6 +7,7 @@
 #include <arpa/inet.h> 
 
 #include "http/parser.h"
+#include "http/responce.h"
 
 #define PORT 4500
 #define BUFSIZE 4096
@@ -21,6 +22,7 @@ int main(int argc, char const *argv[]){
 	memset(buffer, 0, BUFSIZE); // clear buffer
 
 	char* server_msg = "server is running";
+	char* response;
 
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -77,8 +79,8 @@ int main(int argc, char const *argv[]){
 			if (req->body) printf("Body: %s\n", req->body);
 			else printf("Body: NULL\n");
 		}
-
-		send(new_socket, server_msg, strlen(server_msg), 0);
+		response = res_200("<html><body><h1>Hello, World!</h1></body></html>");
+		send(new_socket, response, strlen(response), 0);
 		printf("\nServer message sent\n");
 
 		close(new_socket);
