@@ -7,6 +7,8 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCES
     src/server.c
     src/http/parser.c
+    src/http/responce.c
+    src/http/responce_headers.c
 )
 
 # Include directories
