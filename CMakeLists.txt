@@ -3,6 +3,9 @@ project(HttpCerver C)
 
 set(CMAKE_C_STANDARD 99)
 
+# Enable sanitizers in Debug mode
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined -g -O1")
+
 # Source files
 set(SOURCES
     src/server.c

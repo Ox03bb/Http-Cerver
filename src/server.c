@@ -58,30 +58,31 @@ int main(int argc, char const *argv[]){
 		}
 
 		read(new_socket, buffer, BUFSIZE);
-		// printf("Client: %s\n", buffer);
+		// printf("\n\nreq: %s\n\n", buffer);
+		// printf("\n==============================\n");
 		HttpRequest* req = parse_http_request(buffer);
 
-
 		if (req) {
-			printf("Method: %s\n", req->method);
-			if (req->content_length)
-			    printf("Content-Length: %s\n", req->content_length->value);
-			else
-			    printf("Content-Length: NULL\n");
-			printf("Path: %s\n", req->path);
-			printf("Version: %s\n", req->version);
-			printf("header(%d): \n", req->header_count);
-			int cnt = 0;
-			while (req->headers[cnt].key) {
-			    printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);
-			    cnt++;
-			}
-			if (req->body) printf("Body: %s\n", req->body);
-			else printf("Body: NULL\n");
+			printf("Method: %s path: %s\n", req->method, req->path);
+			// if (req->content_length)
+			//     printf("Content-Length: %s\n", req->content_length->value);
+			// else
+			//     printf("Content-Length: NULL\n");
+			// printf("Path: %s\n", req->path);
+			// printf("Version: %s\n", req->version);
+			// printf("header(%d): \n", req->header_count);
+			// int cnt = 0;
+			// while (req->headers[cnt].key) {
+			//     printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);
+			//     cnt++;
+			// }
+			// if (req->body) printf("Body: %s\n", req->body);
+			// else printf("Body: NULL\n");
+
 		}
-		response = res_200("<html><body><h1>Hello, World!</h1></body></html>");
-		send(new_socket, response, strlen(response), 0);
-		printf("\nServer message sent\n");
+		file_response(new_socket, req->path);
+
+		// printf("\nServer message sent\n");
 
 		close(new_socket);
 		
