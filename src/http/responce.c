@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <arpa/inet.h> 
 #include <fcntl.h>
-#include <sys/stat.h> // <-- Add this line
 
 #include "http/parser.h"
 
@@ -116,6 +115,7 @@ void file_response(int client_socket, const char* file_path) {
 		"\r\n", content_type, file_size
 	);
 
+	free(content_type);
 
 	write(client_socket, header, strlen(header));
 

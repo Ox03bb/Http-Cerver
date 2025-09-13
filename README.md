@@ -71,6 +71,7 @@ Open [http://localhost:4500/](http://localhost:4500/) in your browser to see the
 - [ ] Implement UDP from scratch
 - [ ] Implement HTTP/3 from scratch
 - [ ] Support HTTPS
+- [ ] Add logging
 
 ## License
 
