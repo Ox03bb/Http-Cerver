@@ -1,6 +1,6 @@
 
-#ifndef RESPONCE_HAEDERS_H
-#define RESPONCE_HAEDERS_H
+#ifndef RESPONCE_HEADERS_H
+#define RESPONCE_HEADERS_H
 
 char* date_header(void);
 char* content_length_header(int length);
