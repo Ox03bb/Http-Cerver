@@ -5,7 +5,7 @@
 char* date_header(void);
 char* content_length_header(int length);
 char* cache_control_header(const char* directive);
-
+char* content_type_header(const char* filename);
 
 #define SERVER_HEADER "Server: Http-Cerver/0.1\r\n"
 
@@ -19,6 +19,9 @@ char* cache_control_header(const char* directive);
 #define CONTENT_TYPE_TEXT "Content-Type: text/plain\r\n"
 #define CONTENT_TYPE_XML "Content-Type: application/xml\r\n"
 #define CONTENT_TYPE_FORM "Content-Type: application/x-www-form-urlencoded\r\n"
+#define CONTENT_TYPE_GIF "Content-Type: image/gif\r\n"
+#define CONTENT_TYPE_SVG "Content-Type: image/svg+xml\r\n"
+#define CONTENT_TYPE_OCTET_STREAM "Content-Type: application/octet-stream\r\n"
 
 #define CONTENT_LENGTH "Content-Length: %d\r\n"
 #define DATE_HEADER "Date: %s\r\n"

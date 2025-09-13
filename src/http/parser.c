@@ -4,7 +4,7 @@
 #include <string.h>
 #include <regex.h>
 
-#define URL_PATH_PATTERN "^(/|/[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)*/?)$"
+#define URL_PATH_PATTERN "^(/|/[a-zA-Z0-9._?-]+(/[a-zA-Z0-9._?-]+)*/?)$"
 #define QUERY_PARAM_PATTERN "^[a-zA-Z0-9_]+=[a-zA-Z0-9_]+(&[a-zA-Z0-9_]+=[a-zA-Z0-9_]+)*$"
 
 char* methods[9] = {"GET","POST","PUT","DELETE","HEAD","OPTIONS","PATCH","TRACE","CONNECT"};
@@ -79,16 +79,16 @@ char* parse_http_path(char* ptr , HttpRequest* req) {
 
 	while (*ptr != ' ' && *ptr != '\r' && *ptr != '\0') {
 		path[cur++] = *ptr++;
-		if (*ptr == '?') {
-			ptr++;
-			int cur2 = 0;
-			while (*ptr != ' ' && *ptr != '\r' && *ptr != '\0') {
-				query_params[cur2++] = *ptr++;
-			}
-			query_params[cur2] = '\0';
-			req->query_params = strdup(query_params);
-			break;
-		}
+		// if (*ptr == '?') {
+		// 	ptr++;
+		// 	int cur2 = 0;
+		// 	while (*ptr != ' ' && *ptr != '\r' && *ptr != '\0') {
+		// 		query_params[cur2++] = *ptr++;
+		// 	}
+		// 	query_params[cur2] = '\0';
+		// 	req->query_params = strdup(query_params);
+		// 	break;
+		// }
 	}
 	path[cur++] = '\0';
 	
@@ -215,6 +215,8 @@ int8_t parse_http_body(char* ptr, HttpRequest* req) {
 	req->body = strdup(body);
 	return 0;
 }
+
+
 
 HttpRequest* parse_http_request(char* request) {
 	HttpRequest* req = malloc(sizeof(HttpRequest));
