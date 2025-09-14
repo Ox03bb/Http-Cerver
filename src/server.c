@@ -8,6 +8,7 @@
 
 #include "http/parser.h"
 #include "http/responce.h"
+#include "logging.h"
 
 #define PORT 4500
 #define BUFSIZE 4096
@@ -50,6 +51,7 @@ int main(int argc, char const *argv[]){
     }
 	printf("Server listening on address %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
+	int status;
 	while (1) {
 		int new_socket = accept(server_fd, (struct sockaddr*)&addr, &addr_len);
 		if (new_socket < 0) {
@@ -58,36 +60,21 @@ int main(int argc, char const *argv[]){
 		}
 
 		read(new_socket, buffer, BUFSIZE);
-		// printf("\n\nreq: %s\n\n", buffer);
-		// printf("\n==============================\n");
+
 		HttpRequest* req = parse_http_request(buffer);
 
 		if (req) {
 			printf("Method: %s path: %s\n", req->method, req->path);
-			// if (req->content_length)
-			//     printf("Content-Length: %s\n", req->content_length->value);
-			// else
-			//     printf("Content-Length: NULL\n");
-			// printf("Path: %s\n", req->path);
-			// printf("Version: %s\n", req->version);
-			// printf("header(%d): \n", req->header_count);
-			// int cnt = 0;
-			// while (req->headers[cnt].key) {
-			//     printf("%d - %s : %s\n", cnt+1, req->headers[cnt].key, req->headers[cnt].value);
-			//     cnt++;
-			// }
-			// if (req->body) printf("Body: %s\n", req->body);
-			// else printf("Body: NULL\n");
-
+			int status = file_response(new_socket, req->path);
+			http_log(req, INFO, status_code_to_string(status));
+			free(req->method);
 		}
-		file_response(new_socket, req->path);
-
-		// printf("\nServer message sent\n");
-
+		
 		close(new_socket);
 		
 		memset(buffer, 0, BUFSIZE);
 	}
 	free(buffer);
+	
 	return 0;
 }

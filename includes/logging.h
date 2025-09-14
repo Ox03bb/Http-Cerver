@@ -14,5 +14,7 @@
 #define CODE_404 "\033[31m404\033[0m" // Not Found
 #define CODE_500 "\033[31m500\033[0m" // Internal Server Error
 
+void http_log(HttpRequest *request, char *level, char *code);
+char* status_code_to_string(int code);
 
 #endif // LOGGING_H

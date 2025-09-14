@@ -3,6 +3,6 @@
 
 void res_404(int client_socket);
 char* res_200(const char* body);
-void file_response(int client_socket, const char* file_path);
+int file_response(int client_socket, const char* file_path);
 
 #endif // RESPONCE_H

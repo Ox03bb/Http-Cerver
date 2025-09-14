@@ -9,7 +9,7 @@
 #include <fcntl.h>
 
 #include "http/parser.h"
-
+#include "logging.h"
 
 #include "http/responce_headers.h"
 #include "http/status_codes.h"
@@ -29,6 +29,7 @@ void res_404(int client_socket) {
             "Content-Length: 13\r\n"
             "\r\n"
             "404 Not Found";
+
         write(client_socket, not_found, strlen(not_found));
         return;
     }
@@ -83,7 +84,7 @@ char* res_200(const char* body) {
 	return strdup(response);
 }
 
-void file_response(int client_socket, const char* file_path) {
+int file_response(int client_socket, const char* file_path) {
 	char full_path[512];
 	if (strcmp(file_path, "/") == 0){
 		snprintf(full_path, sizeof(full_path), ".%s/www/html/index.html", PUBLIC_PATH);
@@ -93,10 +94,9 @@ void file_response(int client_socket, const char* file_path) {
 	}
 
 	int file = open(full_path, O_RDONLY);
-	printf("\n==>full_path: %s\n", full_path);
 	if (file == -1) {
 		res_404(client_socket);
-		return;
+		return 404;
 	}
 
 	struct stat st;
@@ -104,8 +104,6 @@ void file_response(int client_socket, const char* file_path) {
 	off_t file_size = st.st_size;
 
 	char* content_type = content_type_header(full_path);
-
-	printf("content_type:\n%s", content_type);
 
 	char header[1024];
 	snprintf(header, sizeof(header),
@@ -126,4 +124,5 @@ void file_response(int client_socket, const char* file_path) {
 	}
 
 	close(file);
+	return 200;
 }
