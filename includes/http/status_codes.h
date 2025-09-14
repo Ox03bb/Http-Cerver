@@ -1,3 +1,5 @@
+#ifndef STATUS_CODES_H
+#define STATUS_CODES_H
 
 #define CRLF "\r\n"
 
@@ -22,3 +24,5 @@
 #define HTTP_500 "HTTP/1.1 500 Internal Server Error\r\n"
 #define HTTP_501 "HTTP/1.1 501 Not Implemented\r\n"
 #define HTTP_505 "HTTP/1.1 505 HTTP Version Not Supported\r\n"
+
+#endif // STATUS_CODES_H
