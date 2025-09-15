@@ -67,7 +67,7 @@ int main(int argc, char const *argv[]) {
             printf("Method: %s path: %s\n", req->method, req->path);
             int status = file_response(new_socket, req->path);
             http_log(req, INFO, status_code_to_string(status));
-            free(req->method);
+            free_http_request(req);
         }
 
         close(new_socket);

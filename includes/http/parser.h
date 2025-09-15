@@ -20,5 +20,6 @@ typedef struct HttpRequest {
 } HttpRequest;
 
 HttpRequest *parse_http_request(char *request);
+void free_http_request(HttpRequest *req);
 
 #endif // PARSER_H

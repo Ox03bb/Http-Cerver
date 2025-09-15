@@ -18,7 +18,7 @@
 
 void res_404(int client_socket) {
     char response[2048];
-    char html_path[512] = "./public/www/html/404.html";
+    char html_path[512] = "public/www/html/404.html";
     int file = open(html_path, O_RDONLY);
     if (file == -1) {
         // File not found, send 404

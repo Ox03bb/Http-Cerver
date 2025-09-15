@@ -272,3 +272,46 @@ HttpRequest *parse_http_request(char *request) {
 
     return req;
 }
+
+void free_http_request(HttpRequest *req) {
+    if (req->method)
+        free(req->method);
+    if (req->path)
+        free(req->path);
+    if (req->version)
+        free(req->version);
+    if (req->host) {
+        if (req->host->key)
+            free(req->host->key);
+        if (req->host->value)
+            free(req->host->value);
+        free(req->host);
+    }
+    if (req->user_agent) {
+        if (req->user_agent->key)
+            free(req->user_agent->key);
+        if (req->user_agent->value)
+            free(req->user_agent->value);
+        free(req->user_agent);
+    }
+    if (req->content_length) {
+        if (req->content_length->key)
+            free(req->content_length->key);
+        if (req->content_length->value)
+            free(req->content_length->value);
+        free(req->content_length);
+    }
+    if (req->headers) {
+        for (int i = 0; i < req->header_count; i++) {
+            if (req->headers[i].key)
+                free(req->headers[i].key);
+            if (req->headers[i].value)
+                free(req->headers[i].value);
+        }
+        free(req->headers);
+    }
+    if (req->body) {
+        free(req->body);
+    }
+    free(req);
+}
