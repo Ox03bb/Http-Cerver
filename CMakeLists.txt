@@ -12,6 +12,7 @@ set(SOURCES
     src/http/parser.c
     src/http/responce.c
     src/http/responce_headers.c
+    src/logging.c
 )
 
 # Include directories
