@@ -40,3 +40,16 @@ char *status_code_to_string(int code) {
         return "\033[33mUnknown\033[0m"; // Unknown code in yellow
     }
 }
+
+char *status_code_to_level(int code) {
+
+    if (code >= 100 && code < 300) {
+        return INFO;
+    } else if (code >= 400 && code < 500) {
+        return WARN;
+    } else if (code >= 500) {
+        return ERROR;
+    } else {
+        return "Unknown";
+    }
+}

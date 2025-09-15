@@ -18,5 +18,6 @@
 
 void http_log(HttpRequest *request, char *level, char *code);
 char *status_code_to_string(int code);
+char *status_code_to_level(int code);
 
 #endif // LOGGING_H
