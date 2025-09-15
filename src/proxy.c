@@ -35,9 +35,9 @@ int proxy(int client_socket, char *request) {
 
     send(client_fd, request, strlen(request), 0);
 
-    while (read(client_fd, buffer, 4096 - 1) > 0) {
+    while (valread = read(client_fd, buffer, 4096 - 1) > 0) {
         write(client_socket, buffer, strlen(buffer));
-        memset(buffer, 0, sizeof(buffer));
+        memset(buffer, 0, valread);
     }
 
     close(client_fd);
