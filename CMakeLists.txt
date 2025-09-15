@@ -9,10 +9,11 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=un
 # Source files
 set(SOURCES
     src/server.c
+    src/logging.c
+    src/proxy.c
     src/http/parser.c
     src/http/responce.c
     src/http/responce_headers.c
-    src/logging.c
 )
 
 # Include directories

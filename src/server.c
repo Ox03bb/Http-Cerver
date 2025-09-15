@@ -9,6 +9,7 @@
 #include "http/parser.h"
 #include "http/responce.h"
 #include "logging.h"
+#include "proxy.h"
 
 #define PORT    4500
 #define BUFSIZE 4096
@@ -64,9 +65,13 @@ int main(int argc, char const *argv[]) {
         HttpRequest *req = parse_http_request(buffer);
 
         if (req) {
-            printf("Method: %s path: %s\n", req->method, req->path);
-            int status = file_response(new_socket, req->path);
-            http_log(req, INFO, status_code_to_string(status));
+            if (PROXY_MODE && strncmp(req->path, PROXY_PREFIX, strlen(PROXY_PREFIX)) == 0) {
+                status = proxy(new_socket, buffer);
+
+            } else {
+                status = file_response(new_socket, req->path);
+            }
+            http_log(req, status_code_to_level(status), status_code_to_string(status));
             free_http_request(req);
         }
 
