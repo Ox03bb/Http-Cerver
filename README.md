@@ -14,6 +14,9 @@ A lightweight HTTP server written in C using sockets, capable of handling basic 
 - Simple request parsing and response headers
 - Easily extensible for more HTTP methods
 
+> [!note]
+>This project is a learning exercise in C programming and socket programming. It is not intended for production use.
+
 ## Directory Structure
 
 ```
@@ -27,13 +30,22 @@ Http-Cerver
 │       └── html/
 ├── src/
 │   ├── http/
-│	│	├── parser.c
+│   │   ├── parser.c
 │   │   ├── responce_headers.c
 │   │   └── responce.c
 │   ├── main.c
+│   ├── proxy.c
+│   ├── logging.c
 │   └── server.c
+├── scripts/
+│   ├── build.sh // Build the project
+│   └── format.sh // Format the code using clang-format
 ├── build/
 ├── bin/
+├── CMakeLists.txt
+├── LICENSE
+├── .clang-format
+├── .gitignore
 └── README.md
 ```
 
@@ -47,8 +59,7 @@ Http-Cerver
 ### Build
 
 ```sh
-cmake -S . -B build
-cmake --build build
+./scripts/build.sh
 ```
 
 The server binary will be in `build/http_server`.
@@ -71,7 +82,6 @@ Open [http://localhost:4500/](http://localhost:4500/) in your browser to see the
 - [ ] Implement UDP from scratch
 - [ ] Implement HTTP/3 from scratch
 - [ ] Support HTTPS
-- [ ] Add logging
 
 ## License
 
