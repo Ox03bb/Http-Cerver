@@ -33,6 +33,8 @@ int proxy(int client_socket, char *request) {
         return 500;
     }
 
+    remove_substring(request, PROXY_PREFIX);
+
     send(client_fd, request, strlen(request), 0);
 
     while (valread = read(client_fd, buffer, 4096 - 1) > 0) {

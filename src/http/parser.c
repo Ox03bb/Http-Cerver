@@ -315,3 +315,22 @@ void free_http_request(HttpRequest *req) {
     }
     free(req);
 }
+
+void remove_substring(char *str, const char *sub) {
+    if (!str || !sub) {
+        return;
+    }
+
+    char *ptr, *temp;
+    int len = strlen(sub);
+
+    ptr = strstr(str, sub);
+
+    if (ptr) {
+        temp = ptr + len - 1;
+        while (*temp != '\0') {
+            *ptr++ = *temp++;
+        }
+        *ptr = '\0';
+    }
+}
