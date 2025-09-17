@@ -14,6 +14,9 @@ A lightweight HTTP server written in C using sockets, capable of handling basic 
 - Simple request parsing and response headers
 - Easily extensible for more HTTP methods
 
+> [!note]
+>This project is a learning exercise in C programming and socket programming. It is not intended for production use.
+
 ## Directory Structure
 
 ```
