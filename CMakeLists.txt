@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(HttpCerver C)
 
+find_package(OpenSSL REQUIRED)
+
 set(CMAKE_C_STANDARD 99)
 
 # Enable sanitizers in Debug mode
@@ -11,6 +13,7 @@ set(SOURCES
     src/server.c
     src/logging.c
     src/proxy.c
+    src/secure_con.c
     src/http/parser.c
     src/http/responce.c
     src/http/responce_headers.c
@@ -24,7 +27,9 @@ include_directories(
 
 add_executable(http_server ${SOURCES})
 
-# Link system libraries
-target_link_libraries(http_server
+
+target_link_libraries(http_server PRIVATE
     pthread
+    OpenSSL::SSL
+    OpenSSL::Crypto
 )

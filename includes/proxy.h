@@ -7,7 +7,7 @@
 #define PROXY_PREFIX "/proxy/"
 #define PROXY_MODE   1
 
-int proxy(int client_socket, char *request);
+int proxy(SSL *ssl, char *request);
 void remove_substring(char *str, const char *sub);
 
 #endif // PROXY_H

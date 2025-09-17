@@ -6,11 +6,15 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+
 #include "http/parser.h"
 #include "logging.h"
 #include "proxy.h"
+#include "secure_con.h"
 
-int proxy(int client_socket, char *request) {
+int proxy(SSL *ssl, char *request) {
     int status, valread, client_fd;
     struct sockaddr_in serv_addr;
 
@@ -35,10 +39,10 @@ int proxy(int client_socket, char *request) {
 
     remove_substring(request, PROXY_PREFIX);
 
-    send(client_fd, request, strlen(request), 0);
+    write(client_fd, request, strlen(request));
 
     while (valread = read(client_fd, buffer, 4096 - 1) > 0) {
-        write(client_socket, buffer, strlen(buffer));
+        SSL_write(ssl, buffer, strlen(buffer));
         memset(buffer, 0, valread);
     }
 
