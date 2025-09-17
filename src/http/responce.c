@@ -8,15 +8,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+
 #include "http/parser.h"
 #include "logging.h"
 
 #include "http/responce_headers.h"
 #include "http/status_codes.h"
+#include "secure_con.h"
 
 #define PUBLIC_PATH "/public"
 
-void res_404(int client_socket) {
+void res_404(SSL *ssl) {
     char response[2048];
     char html_path[512] = "public/www/html/404.html";
     int file = open(html_path, O_RDONLY);
@@ -28,7 +32,7 @@ void res_404(int client_socket) {
                                 "\r\n"
                                 "404 Not Found";
 
-        write(client_socket, not_found, strlen(not_found));
+        SSL_write(ssl, not_found, strlen(not_found));
         return;
     }
 
@@ -41,13 +45,13 @@ void res_404(int client_socket) {
     snprintf(header, sizeof(header), "HTTP/1.1 200 OK\r\n" CONTENT_TYPE_HTML,
              "Content-Length: %ld\r\n", "\r\n", file_size);
 
-    write(client_socket, header, strlen(header));
+    SSL_write(ssl, header, strlen(header));
 
     // Send file content
     char buffer[4096];
     ssize_t bytes_read;
     while ((bytes_read = read(file, buffer, sizeof(buffer))) > 0) {
-        write(client_socket, buffer, bytes_read);
+        SSL_write(ssl, buffer, bytes_read);
     }
 
     close(file);
@@ -69,7 +73,10 @@ char *res_200(const char *body) {
     return strdup(response);
 }
 
-int file_response(int client_socket, const char *file_path) {
+int file_response(SSL *ssl, const char *file_path) {
+    if (!ssl)
+        return 500;
+
     char full_path[512];
     if (strcmp(file_path, "/") == 0) {
         snprintf(full_path, sizeof(full_path), ".%s/www/html/index.html", PUBLIC_PATH);
@@ -79,10 +86,9 @@ int file_response(int client_socket, const char *file_path) {
 
     int file = open(full_path, O_RDONLY);
     if (file == -1) {
-        res_404(client_socket);
+        res_404(ssl);
         return 404;
     }
-
     struct stat st;
     fstat(file, &st);
     off_t file_size = st.st_size;
@@ -99,12 +105,12 @@ int file_response(int client_socket, const char *file_path) {
 
     free(content_type);
 
-    write(client_socket, header, strlen(header));
+    SSL_write(ssl, header, strlen(header));
 
     char buffer[4096];
     ssize_t bytes_read;
     while ((bytes_read = read(file, buffer, sizeof(buffer))) > 0) {
-        write(client_socket, buffer, bytes_read);
+        SSL_write(ssl, buffer, bytes_read);
     }
 
     close(file);

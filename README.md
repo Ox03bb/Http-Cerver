@@ -78,10 +78,11 @@ Open [http://localhost:4500/](http://localhost:4500/) in your browser to see the
 
 ## TODO
 
+- [X] Support HTTPS
+- [ ] add dynamic config
 - [ ] Support HTTP/2
 - [ ] Implement UDP from scratch
 - [ ] Implement HTTP/3 from scratch
-- [ ] Support HTTPS
 
 ## License
 
