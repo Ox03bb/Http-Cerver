@@ -14,7 +14,7 @@
 #include "proxy.h"
 #include "secure_con.h"
 
-int proxy(SSL *ssl, char *request) {
+int proxy(SSL *ssl, char *request, Config cfg) {
     int status, valread, client_fd;
     struct sockaddr_in serv_addr;
 
@@ -25,9 +25,9 @@ int proxy(SSL *ssl, char *request) {
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PROXY_PORT);
+    serv_addr.sin_port = htons(cfg.proxy.target_port);
 
-    if (inet_pton(AF_INET, PROXY_ADDR, &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, cfg.proxy.target_ip, &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return 500;
     }
@@ -37,7 +37,7 @@ int proxy(SSL *ssl, char *request) {
         return 500;
     }
 
-    remove_substring(request, PROXY_PREFIX);
+    remove_substring(request, cfg.proxy.prefix);
 
     write(client_fd, request, strlen(request));
 

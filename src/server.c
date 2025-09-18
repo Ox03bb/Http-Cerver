@@ -9,6 +9,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
+#include "config.h"
 #include "http/parser.h"
 #include "http/responce.h"
 #include "logging.h"
@@ -18,17 +19,27 @@
 #define PORT    4500
 #define BUFSIZE 4096
 
-int main(int argc, char const *argv[]) {
+int server() {
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     int opt = 1;
+
+    Config cfg = {0};
+
+    if (load_config("./config.toml", &cfg) != 0) {
+        fprintf(stderr, "Failed to load config\n");
+        return 1;
+    }
+
+    printf("Server will start at %s:%d\n", cfg.server.host, cfg.server.port);
+    printf("Public directory: %s\n", cfg.server.cert_file);
 
     char *buffer = malloc(BUFSIZE);
     memset(buffer, 0, BUFSIZE);
 
     SSL_library_init();
     SSL_CTX *ctx = init_server_ctx();
-    load_certificates(ctx, CERT_FILE, KEY_FILE);
+    load_certificates(ctx, cfg.server.cert_file, cfg.server.key_file);
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
@@ -42,7 +53,7 @@ int main(int argc, char const *argv[]) {
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(PORT);
+    addr.sin_port = htons(cfg.server.port);
 
     if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         perror("bind failed");
@@ -79,8 +90,9 @@ int main(int argc, char const *argv[]) {
 
                 HttpRequest *req = parse_http_request(buffer);
                 if (req) {
-                    if (PROXY_MODE && strncmp(req->path, PROXY_PREFIX, strlen(PROXY_PREFIX)) == 0) {
-                        status = proxy(ssl, buffer);
+                    if (cfg.proxy.enable == 1 &&
+                        strncmp(req->path, cfg.proxy.prefix, strlen(cfg.proxy.prefix)) == 0) {
+                        status = proxy(ssl, buffer, cfg);
                     } else {
                         status = file_response(ssl, req->path);
                     }
