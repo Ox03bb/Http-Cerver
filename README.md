@@ -23,6 +23,8 @@ A lightweight HTTP server written in C using sockets, capable of handling basic 
 Http-Cerver
 ├── includes/
 │   └── http/
+├── vendor/
+├── certs/
 ├── public/
 │   └── img/
 │   └── www/
@@ -79,7 +81,7 @@ Open [http://localhost:4500/](http://localhost:4500/) in your browser to see the
 ## TODO
 
 - [X] Support HTTPS
-- [ ] add dynamic config
+- [X] Add dynamic config
 - [ ] Support HTTP/2
 - [ ] Implement UDP from scratch
 - [ ] Implement HTTP/3 from scratch

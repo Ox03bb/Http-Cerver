@@ -10,9 +10,11 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize=un
 
 # Source files
 set(SOURCES
+    src/main.c
     src/server.c
     src/logging.c
     src/proxy.c
+    src/config.c
     src/secure_con.c
     src/http/parser.c
     src/http/responce.c
@@ -23,12 +25,16 @@ set(SOURCES
 include_directories(
     includes
     includes/http
+
+    vendor/tomlc99
 )
 
 add_executable(http_server ${SOURCES})
 
+add_library(tomlc99 vendor/tomlc99/toml.c)
 
 target_link_libraries(http_server PRIVATE
+    tomlc99
     pthread
     OpenSSL::SSL
     OpenSSL::Crypto
